@@ -2,7 +2,7 @@ from __future__ import print_function
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
-import ReadEQDSK
+import a4py.classes.ReadEQDSK
 
 def check_ascotinput(fin='/home/vallar/JT60-SA/3D/bfield/003/3Dfield_forascot_onlyTF.h5'):
     """
@@ -13,7 +13,7 @@ def check_ascotinput(fin='/home/vallar/JT60-SA/3D/bfield/003/3Dfield_forascot_on
     @author: vallar
     """
     f=h5py.File(fin)
-    id =  f['bfield'].keys()[0]
+    id =  list(f['bfield'].keys())[0]
     print('Id chosen is ' + id)
     bstruct = f['bfield/'+id]
 

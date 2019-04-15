@@ -60,6 +60,9 @@ def plot_TFcoils(fncoils='/home/vallar/JT60-SA/3D/bfield/biosaw/wholecoils.h5', 
     Plot  the JT60SA TF coils from a biosaw h5 output
     """
     col=['k', 'g', 'r', 'b']
+    f = h5py.File(fncoils)
+    x={}; y={}; z={}
+    xnew={}; ynew={}
     if type(ax)==int:
         fig=plt.figure(); ax = fig.add_subplot(111, projection='3d')
 
@@ -85,9 +88,10 @@ def plot_EFCCcoils(fncoils='/home/vallar/JT60-SA/3D/bfield/biosaw/wholecoils.h5'
     Plot the JT60SA EFCC coils from a biosaw h5 output    
     """
     col=['k', 'g', 'r', 'b']
-    coilname=['EFCC01', 'EFCC02', 'EFCC03', 'EFCC04', 'EFCC05', 'EFCC06',/
-              'EFCC07', 'EFCC08', 'EFCC09', 'EFCC10', 'EFCC11', 'EFCC12',/
+    coilname=['EFCC01', 'EFCC02', 'EFCC03', 'EFCC04', 'EFCC05', 'EFCC06', \
+              'EFCC07', 'EFCC08', 'EFCC09', 'EFCC10', 'EFCC11', 'EFCC12', \
               'EFCC13', 'EFCC14', 'EFCC15', 'EFCC16', 'EFCC17', 'EFCC18']
+    f=h5py.File(fncoils)
     if type(ax)==int:
         fig=plt.figure(); ax = fig.add_subplot(111, projection='3d')
 
