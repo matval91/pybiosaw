@@ -14,9 +14,20 @@ def check_ascotinput(fin='/home/vallar/JT60-SA/3D/bfield/003/3Dfield_forascot_on
     """
     f=h5py.File(fin)
     id =  list(f['bfield'].keys())[0]
+    if '3' not in id[0:5]:
+        for i, el in enumerate(list(f['bfield'].keys())):
+            print(i,el)
+        nn = input('Print which id number you want \n')
+        id =  list(f['bfield'].keys())[int(nn)]
     print('Id chosen is ' + id)
     bstruct = f['bfield/'+id]
+    plot_bstruct(bstruct)
+    return bstruct
 
+
+def plot_bstruct(bstruct):
+    """
+    """
     #Creating grid
     nR = bstruct['n_R'].value
     Rmin, Rmax = bstruct['R_min'].value, bstruct['R_max'].value
@@ -32,7 +43,8 @@ def check_ascotinput(fin='/home/vallar/JT60-SA/3D/bfield/003/3Dfield_forascot_on
     # Bphi has the shape (phi, z, R)
     Bphi = bstruct['B_phi'].value
     ind_midplane = np.argmin(z-0 <0)
-    fig=plt.figure(); ax=fig.add_subplot(111); ax.set_title(r'$B_\phi$ on midplane')
+    fig=plt.figure(figsize=(20,8)); 
+    ax=fig.add_subplot(131); ax.set_title(r'$B_\phi$ on midplane')
     cs=ax.contour(R, phi, Bphi[:, ind_midplane, :], 40)
     cb=plt.colorbar(cs)
     ax.set_xlabel(r'R [m]'); ax.set_ylabel(r'phi')
@@ -40,21 +52,24 @@ def check_ascotinput(fin='/home/vallar/JT60-SA/3D/bfield/003/3Dfield_forascot_on
 
     BR = bstruct['B_R'].value
     ind_phi0 = np.argmin(phi-0 <0)
-    fig=plt.figure(); ax=fig.add_subplot(111); ax.set_title(r'$B_R (\phi=0)$ ')
+    ax=fig.add_subplot(132); ax.set_title(r'$B_R (\phi=0)$ ')
     cs=ax.contour(R, z, BR[ind_phi0,:, :], 40); 
     cb=plt.colorbar(cs)
     ax.set_xlabel(r'R [m]'); ax.set_ylabel(r'z [m]')
+    ax.axis('equal')
     fig.tight_layout()
 
     Bz = bstruct['B_z'].value
     ind_phi0 = np.argmin(phi-0 <0)
-    fig=plt.figure(); ax=fig.add_subplot(111); ax.set_title(r'$B_z (\phi=0)$ ')
+    ax=fig.add_subplot(133); ax.set_title(r'$B_z (\phi=0)$ ')
     cs=ax.contour(R, z, Bz[ind_phi0,:, :], 40); 
     cb=plt.colorbar(cs)
     ax.set_xlabel(r'R [m]'); ax.set_ylabel(r'z [m]')
+    ax.axis('equal')
     fig.tight_layout()
-
+    
     plt.show()
+
 
 def compare_3Dvs2D(fin_3d='/home/vallar/JT60-SA/3D/bfield/biosaw2ascot/ascot_TFfield_b0expr0exp.h5', eqd_2d='/home/vallar/JT60-SA/003/eqdsk_fromRUI_20170715_SCENARIO3/EQDSK_COCOS_02.OUT'):
 
