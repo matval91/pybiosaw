@@ -1,11 +1,5 @@
 """
-Combine magnetic single-coil magnetic perturbation from TF coils and EFCCs to
-create 3D magnetic field input for ASCOT5.
-
-This script assume the field data has 720 grid points representing [0, 360] grid
-in phi. One grid interval is therefore 0.5 deg.
-
-TODO Rotation could be put into its own function (that accepts scaling factor)
+Plots EFCC coils
 """
 import numpy as np
 import h5py
