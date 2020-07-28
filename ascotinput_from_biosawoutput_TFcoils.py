@@ -13,21 +13,51 @@ import a5py.ascot5io.B_3DS as B_3D
 import a5py.ascot5io.B_2DS as B_2D
 
 import matplotlib.pyplot as plt
-from scipy.interpolate import interp2d, RectBivariateSpline
-import ReadEQDSK
-import a4py.utils.cocos_transform as ct
+from scipy.interpolate import interp2d, interp1d, RectBivariateSpline
+import a4py.classes.ReadEQDSK as ReadEQDSK
+import utils.cocos_transform as ct
 
 #Reading eqdsk with 2D fieldEquil_JT60_prova01_e_refined_COCOS7
 #_eq=ReadEQDSK.ReadEQDSK('/home/vallar/JT60-SA/003/eqdsk_fromRUI_20170715_SCENARIO3/EQDSK_COCOS_02.OUT')
 #eq = ct.cocos_transform(_eq, 2, 5)
+fname = '/home/vallar/JT60-SA/003/eqdsk_fromRUI_20170715_SCENARIO3/Equil_JT60_prova01_e_refined_COCOS7.eqdsk'
+fname = '/home/vallar/WORK/JT-60SA/input/003/eqdsk/JT-60SA_scenario2_highden_eqdsk_chease_cocos02_smoothed.geq'
 
-_eq=ReadEQDSK.ReadEQDSK('/home/vallar/JT60-SA/003/eqdsk_fromRUI_20170715_SCENARIO3/Equil_JT60_prova01_e_refined_COCOS7.eqdsk')
-eq = ct.cocos_transform(_eq, 7,5)
-eq.psi = np.reshape(eq.psi,(400,250))
+_eq=ReadEQDSK.ReadEQDSK(fname)
+eq = ct.cocos_transform(_eq, 2,5)
+
+#===
+# Finding toroidal B field from eqdsk
+# 1) Definining R and Z grid from eqdsk
+R = np.linspace(eq.rboxleft, (eq.rboxleft+eq.rboxlength), eq.nrbox)
+Z = np.linspace(-eq.zboxlength/2., 0.5*eq.zboxlength, eq.nzbox)
+# 2) interpolating psi2D and find the values on the midplane (where rho<1.)
+p_psi2D=interp2d(R,Z, eq.psi)
+psiN_RZ = (eq.psi-eq.psiaxis)/(eq.psiedge-eq.psiaxis)
+psi_midplane = p_psi2D(R, eq.zmid)
+psiN_on_midplane = (psi_midplane-eq.psiaxis)/(eq.psiedge-eq.psiaxis)
+R_on_midplane = R[psiN_on_midplane<=1.]
+psiN_on_midplane = psiN_on_midplane[psiN_on_midplane<=1.]
+# 3) Interpolation of T, finding T on midplane
+p_T = interp1d((eq.psi_grid-eq.psiaxis)/(eq.psiedge-eq.psiaxis), eq.T)
+T_on_midplane = p_T(psiN_on_midplane)
+# 4) Finding T given by plasma
+B_vacuum = eq.B0EXP*eq.R0EXP/R_on_midplane
+T_plasma = T_on_midplane - eq.B0EXP*eq.R0EXP
+T_plasma = np.concatenate(([0,0], T_plasma,[0,0]))
+psiN_T_plasma = np.concatenate(([5,1], psiN_on_midplane,[1,5]))
+p_T_plasma = interp1d(psiN_T_plasma, T_plasma, fill_value='extrapolate')
+T_plasmaRZ = p_T_plasma(psiN_RZ)
+# 5) finding Btor given by plasma
+Btor_plasma = T_plasmaRZ/R
+p_Bplasma_rz = interp2d(R,Z, Btor_plasma)
+#===
 
 # Path to file with the coil data and to output file
 fncoils = '/home/vallar/JT60-SA/3D/bfield/biosaw/TF/TFcoilout.h5'
-fnout = '/home/vallar/JT60-SA/3D/bfield/biosaw2ascot/ascot_TFfield_b0expr0exp.h5'
+fncoils = '/home/vallar/WORK/JT-60SA/3D/biosaw/tfcoils_out/TFcoilout.h5'
+
+fnout =  '/home/vallar/WORK/JT-60SA/3D/biosaw/tfcoils_out/ascot_TFfield_wplasma.h5'
 # Read magnetic field grid, this is same for all coils
 coils = h5py.File(fncoils, "r")
 
@@ -95,10 +125,16 @@ for comp in ["BR", "Bphi", "Bz"]:
 Bphi_avg = interp2d(coils["zgrid"][0][:], coils["Rgrid"][0][:], Bphi[:,10+9*2,:])
 TF_scaling_factor = Bphi0/Bphi_avg(zaxis, eq.R0EXP)
 
-
+factor=-1.
 BR   = BR*TF_scaling_factor
-Bphi = -1.*Bphi*TF_scaling_factor
+Bphi = factor*Bphi*TF_scaling_factor
+B_vacuum=np.copy(Bphi)
+B_plasma = p_Bplasma_rz(coils["Rgrid"][0][:], coils["zgrid"][0][:]); B_plasma=B_plasma.T
+for i in range(np.shape(Bphi)[1]):
+    Bphi[:,i,:]+=factor*B_plasma
 Bz   = Bz*TF_scaling_factor
+
+# Add plasma response to Bphi
 
 print('TF coils field computed')
 
@@ -183,9 +219,10 @@ B_3D.write_hdf5(fnout,
                data["Rmin"], data["Rmax"], data["nR"],
                data["zmin"], data["zmax"], data["nz"],
                data["phimin"], data["phimax"], data["nphi"],
-               axisR, axisz, psiRz, psiaxis, psisepx,
-               np.transpose(BR, (2,1,0)), np.transpose(Bphi, (2,1,0)), np.transpose(Bz,(2,1,0)),
-               pRmin=pRmin, pRmax=pRmax, pnR=pnR, pzmin=pzmin, pzmax=pzmax, pnz=pnz)
+               axisR, axisz, psiRz.T, psiaxis, psisepx,
+               BR, Bphi, Bz,
+               psi_rmin=pRmin, psi_rmax=pRmax, psi_nr=pnR, 
+               psi_zmin=pzmin, psi_zmax=pzmax, psi_nz=pnz)
 
 
 # # Write output
