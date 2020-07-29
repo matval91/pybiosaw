@@ -52,12 +52,14 @@ def produce_fields(fncoils='/home/vallar/WORK/JT-60SA/3D/biosaw/efcc_output/whol
 
     _z = np.linspace(pzmin, pzmax, pnz); _R = np.linspace(pRmin, pRmax, pnR)
 
+    # Read biosaw data from file with the coils
     coils, data, BR, Bphi, Bz = read_data(fncoils)
     data['zmin']=-2.5
     data['zmax']=2.5
     data['rmin']=1.7
+    #Compute the magnetic field scaling
     # For EFCCs choose n mode (toroidal), currents and phase differences between coil rows
-    BR,Bphi,Bz = _compute(coils,data, BR, Bphi, Bz,nmode, U, M, L, phases)
+    BR,Bphi,Bz = compute(coils,data, BR, Bphi, Bz,nmode, U, M, L, phases)
     for i,el in enumerate(coils["Rgrid"][0]):
         Bphi[i,:,:] += eq.B0EXP*eq.R0EXP/el
 
@@ -68,9 +70,10 @@ def produce_fields(fncoils='/home/vallar/WORK/JT-60SA/3D/biosaw/efcc_output/whol
     R = np.linspace(data['Rmin'],data['Rmax'], data['nR'])
     psiRz = param_psi(R, z)
 
+
+    # Write output, same grid for fields and psi
     if fnout!='':
         print('Writing to ', fnout)
-        # Write output, same grid for fields and psi
         B_3D.write_hdf5(fnout,
                         data["Rmin"], data["Rmax"], data["nR"],
                         data["zmin"], data["zmax"], data["nz"],
@@ -80,8 +83,9 @@ def produce_fields(fncoils='/home/vallar/WORK/JT-60SA/3D/biosaw/efcc_output/whol
                         psi_rmin=data["Rmin"], psi_rmax=data["Rmax"], psi_nr=data["nR"], \
                         psi_zmin=data["zmin"], psi_zmax=data["zmax"], psi_nz=data["nz"])
 
+    #Calculation of the Bfield normal to the flux surfaces
+    rho_2d=np.sqrt((psiRz-psiaxis)/(psisepx-psiaxis))
     if bnorm_calculation==1:
-        rho_2d=np.sqrt((psiRz-psiaxis)/(psisepx-psiaxis))
         theta,new_phi,newBnorm = Bnormal(data, BR, Bz, eq, rho_bnorm, R, z, rho_2d)
         plot(data, Bphi, theta, new_phi, newBnorm, nmode, phases, eq.q[-5], rho_bnorm)
     else:

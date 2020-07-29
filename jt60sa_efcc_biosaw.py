@@ -34,11 +34,11 @@ def read_data(fncoils):
     return coils,data, BR, Bphi, Bz
 
 
-def _compute(coils,data, BR, Bphi, Bz,nmode, U, M, L, phases):
-	"""
-	Scales the field computed by biosaw with the correct current
-	And puts it with the correct angles
-	"""
+def compute(coils,data, BR, Bphi, Bz,nmode, U, M, L, phases):
+    """
+    Scales the field computed by biosaw with the correct current
+    And puts it with the correct angles
+    """
     # Current for upper, middle, lower set of coils
     Ucurr=30e3*U
     Mcurr=45e3*M

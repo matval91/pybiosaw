@@ -65,9 +65,9 @@ def read_fields(fnfield='/home/vallar/WORK/JT-60SA/3D/biosaw/efcc_output/wholeco
     R = np.linspace(data['Rmin'],data['Rmax'], data['nR'])
     psiRz = param_psi(R, z)
 
+    # Write output, same grid for fields and psi
     if fnout!='':
         print('Writing to ', fnout)
-        # Write output, same grid for fields and psi
         B_3D.write_hdf5(fnout,
                         data["Rmin"], data["Rmax"], data["nR"],
                         data["zmin"], data["zmax"], data["nz"],
@@ -77,6 +77,7 @@ def read_fields(fnfield='/home/vallar/WORK/JT-60SA/3D/biosaw/efcc_output/wholeco
                         psi_rmin=data["Rmin"], psi_rmax=data["Rmax"], psi_nr=data["nR"], \
                         psi_zmin=data["zmin"], psi_zmax=data["zmax"], psi_nz=data["nz"])
 
+    #Calling to computation of Bnorm
     rho_2d=np.sqrt((psiRz-psiaxis)/(psisepx-psiaxis))
     if bnorm_calculation==1:
         theta,new_phi,newBnorm = Bnormal(data, BR, Bz, eq, rho_bnorm, R, z, rho_2d)

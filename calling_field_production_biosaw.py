@@ -21,8 +21,8 @@ U=1
 L=1
 M=0
 phases=[0,0,120] #Careful! putting numbers close to 60 will produce a 0 field!
-bnorm_calculation=1
+bnorm_calculation=0
 rho_bnorm = 1
-data, Bphi, BR, Bz, theta, new_phi, newBnorm=\
+data, Bphi, BR, Bz, theta, new_phi, newBnorm, R, z, rho_2d, eq=\
 b2a.produce_fields(fncoils, fnout, eqd_fname, \
 	nmode,U, M, L,phases, bnorm_calculation, cocos, rho_bnorm)
