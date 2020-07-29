@@ -57,7 +57,8 @@ p_Bplasma_rz = interp2d(R,Z, Btor_plasma)
 fncoils = '/home/vallar/JT60-SA/3D/bfield/biosaw/TF/TFcoilout.h5'
 fncoils = '/home/vallar/WORK/JT-60SA/3D/biosaw/tfcoils_out/TFcoilout.h5'
 
-fnout =  '/home/vallar/WORK/JT-60SA/3D/biosaw/tfcoils_out/ascot_TFfield_wplasma.h5'
+fnout =  './ascot_TFfield_scen003.h5'
+
 # Read magnetic field grid, this is same for all coils
 coils = h5py.File(fncoils, "r")
 

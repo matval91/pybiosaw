@@ -20,8 +20,10 @@ import utils.cocos_transform as ct
 from utils.plot_utils import define_colors
 import scipy.io as io
 
-def produce_fields(fncoils='/home/vallar/JT60-SA/3D/bfield/biosaw/wholecoils.h5', fnout='/home/vallar/JT60-SA/3D/bfield/ITER-like RMPs/EFCC_UML_n3_56deg0deg77deg.h5', eqd_fname='/home/vallar/JT60-SA/003/eqdsk_fromRUI_20170715_SCENARIO3/Equil_JT60_prova01_e_refined_COCOS7.eqdsk',\
-                   nmode=3, U=1., M=1., L=1., phases=[56,0,77], bnorm_calculation=1, cocos=2):
+def produce_fields(fncoils='/home/vallar/JT60-SA/3D/bfield/biosaw/wholecoils.h5', 
+    fnout='/home/vallar/JT60-SA/3D/bfield/ITER-like RMPs/EFCC_UML_n3_56deg0deg77deg.h5', 
+    eqd_fname='/home/vallar/JT60-SA/003/eqdsk_fromRUI_20170715_SCENARIO3/Equil_JT60_prova01_e_refined_COCOS7.eqdsk',\
+                   nmode=3, U=1., M=1., L=1., phases=[56,0,77], bnorm_calculation=1, cocos=7):
     """
     data, Bphi, BR, Bz, theta, new_phi, newBnorm=produce_fields(fncoils, fnout, nmode, U,M,L,phases)
     """
@@ -80,6 +82,7 @@ def produce_fields(fncoils='/home/vallar/JT60-SA/3D/bfield/biosaw/wholecoils.h5'
     if bnorm_calculation==1:
         theta,new_phi,newBnorm = Bnormal(data, BR, Bz, eq)
         plot(data, Bphi, theta, new_phi, newBnorm, nmode, phases,eq.q[-5])
+        save_bnorm(R, axisR, z, theta, new_phi, new_Bnorm)
     else:
         theta=0; new_phi=0; newBnorm=0
 
@@ -177,7 +180,7 @@ def read_data(fncoils):
 
     return coils,data, BR, Bphi, Bz
 
-def Bnormal(data, BR, Bz, eq):
+def Bnormal(data, BR, Bz, eq, rho=1):
     """
     theta, new_phi, Bnorm = Bnormal(data, BR, Bz, _eq)
     """
@@ -188,8 +191,10 @@ def Bnormal(data, BR, Bz, eq):
     z=np.linspace(data['zmin'], data['zmax'], data['nz'])
     BRparam = interp.RegularGridInterpolator((R,phi,z),BR)
     Bzparam = interp.RegularGridInterpolator((R,phi,z),Bz)
-    
-    new_R = eq.R[0:-1]; new_z = eq.Z[0:-1]; new_phi = np.linspace(0,359,360)
+    if rho==1:
+        new_R = eq.R[0:-1]; new_z = eq.Z[0:-1];
+
+    new_phi = np.linspace(0,359,360)
     theta = np.arctan2(new_z,new_R-eq.Raxis)
     Bnorm = np.zeros((np.shape(new_R)[0], np.shape(new_phi)[0]))
     newBR=0; newBz=0
