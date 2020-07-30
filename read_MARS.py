@@ -4,7 +4,7 @@ Function to read the plasma response as received from Leonardo Pigatto
 import h5py
 import numpy as np
 
-def read_data(fnfield, real=1):
+def read_data(fnfield, real=False):
     # Read magnetic field grid, this is same for all coils
     bfield_file = h5py.File(fnfield, "r")
 	#['Bphi', 'Br', 'Bz', 'R', 'Z', 'phi']
