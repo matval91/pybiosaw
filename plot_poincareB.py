@@ -17,9 +17,9 @@ def plot_poincareB(run='', asc_fname='', eqd_fname=''):
     run.orbit.poincare('rho', 'thetamod', 0, markersize=2, axes=ax)
     ax.set_xlabel(r'$\rho_{POL}$'); ax.set_ylabel(r'$\theta$ [°]')
     fig.tight_layout()
-    
+
     # plot in r and z
-    fig=plt.figure(); ax=fig.add_subplot(111)
+    fig=plt.figure(figsize=(6,10)); ax=fig.add_subplot(111)
     run.orbit.poincare('R', 'z', 0, markersize=2, axes=ax)
     b5 = Ascotpy(asc_fname)
     b5.init(bfield=f.bfield.active.get_qid())
