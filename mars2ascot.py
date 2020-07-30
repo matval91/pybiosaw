@@ -27,7 +27,7 @@ import pdb
 def read_fields(fnfield='/home/vallar/WORK/JT-60SA/3D/biosaw/efcc_output/wholecoils_EFCC540phi.h5', 
     fnout='/home/vallar/JT60-SA/3D/bfield/ITER-like/EFCC_UML_n3_56deg0deg77deg.h5', 
     eqd_fname='/home/vallar/JT60-SA/003/eqdsk_fromRUI_20170715_SCENARIO3/Equil_JT60_prova01_e_refined_COCOS7.eqdsk',\
-    bnorm_calculation=1, cocos=7, rho_bnorm=1.):
+    bnorm_calculation=1, cocos=7, rho_bnorm=1., real=False):
     """
     data, Bphi, BR, Bz, theta, new_phi, newBnorm=produce_fields(fncoils, fnout, nmode, U,M,L,phases)
     """
@@ -56,7 +56,14 @@ def read_fields(fnfield='/home/vallar/WORK/JT-60SA/3D/biosaw/efcc_output/wholeco
     _z = np.linspace(pzmin, pzmax, pnz); _R = np.linspace(pRmin, pRmax, pnR)
 
     # Need to read the data as Leonardo sent you
-    coils, data, BR, Bphi, Bz = read_data(fnfield, 0)
+    bpertfile, data, BR, Bphi, Bz = read_data(fnfield, real)
+
+    #The data from MARS are only the perturbation fields. Need to add equilibrium field
+    #YES, IT NEEDS THE -1 for scenario3
+    Bphi_eq_R = -1.*eq.B0EXP*eq.R0EXP/bpertfile["R"][()]
+    Bphi_eq_RZ = np.repeat(Bphi_eq_R, data['nphi']).reshape((data['nR'], data['nphi']))
+    Bphi_eq_RZphi = np.repeat(Bphi_eq_RZ, data['nz']).reshape((data['nR'], data['nphi'], data['nz']))
+    Bphi = Bphi+Bphi_eq_RZphi
 
     # You have to interpolate the psi so that the Rzgrid over which psi 
     # is defined is the same as the B fields
