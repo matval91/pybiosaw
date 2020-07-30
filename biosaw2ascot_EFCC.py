@@ -61,7 +61,7 @@ def produce_fields(fncoils='/home/vallar/WORK/JT-60SA/3D/biosaw/efcc_output/whol
     # For EFCCs choose n mode (toroidal), currents and phase differences between coil rows
     BR,Bphi,Bz = compute(coils,data, BR, Bphi, Bz,nmode, U, M, L, phases)
     for i,el in enumerate(coils["Rgrid"][0]):
-        Bphi[i,:,:] += eq.B0EXP*eq.R0EXP/el
+        Bphi[i,:,:] += -1.*eq.B0EXP*eq.R0EXP/el
 
     # You have to interpolate the psi so that the Rzgrid over which psi 
     # is defined is the same as the B fields
