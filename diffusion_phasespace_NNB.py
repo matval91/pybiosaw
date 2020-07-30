@@ -1,12 +1,13 @@
 import a5py.preprocessing.markers_grid as markers_grid
-
+import a5py.ascot5io.ascot5 as a5
+import os
 dir='/home/vallar/'
 if os.uname().nodename!='spcpc182':
     dir='/home/matval/'
 dir+='WORK/ASCOT/runs/SA_003/RMP_n3_120_UL/RMP_vacuum/nnb'
 fn=f'{dir}/ascot.h5'
 a=a5.Ascot(fn)
-qid=a.run.active.get_qid()
+qid=a.activeqid[1:]
 
 rmin=2.5
 rmax=4
@@ -29,6 +30,6 @@ desc=f'npart={npitch*nr}, rmin={rmin}, rmax={rmax}, nr={nr}, pitchmin={pitchmin}
  energy={energy}'
 
 Rpitch.contourf_attr('deltaenergy')
-
+plt.show()
 print('markers written to')
 print(f'{fn}: {desc}')
