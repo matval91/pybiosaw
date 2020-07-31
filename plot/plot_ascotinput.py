@@ -136,19 +136,20 @@ def plot_poloidalmax(bstruct):
     # Start of solution
     from matplotlib.cm import ScalarMappable
     levels = 400
-    vmin=0; vmax=1e-2
+    vmin=0; vmax=1e-2*1000
     level_boundaries = np.linspace(vmin, vmax, levels + 1)
 
     fig=plt.figure();
-    ax=fig.add_subplot(111); ax.set_title(f'$B_{{pol}} (\phi={phi[ind]:.3f})$')
-    cs=ax.contourf(R, z, B_pol[:, ind, :].T, 1000, cmap='hot', vmin=vmin, vmax=vmax)
-    fig.colorbar(
+    ax=fig.add_subplot(111); ax.set_title(f'$\phi={phi[ind]:.2f}$')
+    cs=ax.contourf(R, z, 1000*B_pol[:, ind, :].T, 1000, cmap='hot', vmin=vmin, vmax=vmax)
+    cbar=fig.colorbar(
         ScalarMappable(norm=cs.norm, cmap=cs.cmap),
-        ticks=np.linspace(vmin, vmax, 10),
+        ticks=np.linspace(vmin, vmax*0.9, 8),
         boundaries=level_boundaries,
-        values=(level_boundaries[:-1] + level_boundaries[1:]) / 2,
+        values=(level_boundaries[:-1] + level_boundaries[1:]) / 2
     )
+    cbar.ax.set_yticklabels(["{:.1f}".format(i) for i in cbar.get_ticks()]) # set ticks of your format
+    cbar.ax.set_title('$B_{POL} [mT]$')
     ax.set_xlabel(r'R [m]'); ax.set_ylabel(r'z [m]')
     ax.axis('equal')
-    fig.tight_layout()
     return fig, ax
