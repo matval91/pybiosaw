@@ -15,9 +15,9 @@ def Bnormal(data, BR, Bz, eq, rho=1, Rpsi=None, zpsi=None, rhoRz=None):
     theta, new_phi, Bnorm = Bnormal(data, BR, Bz, _eq)
     """
     print(f"Finding Bnormal at rho={rho}")
-    R=np.linspace(data['Rmin'], data['Rmax'], data['nR'])
-    phi=np.linspace(data['phimin'], data['phimax'], data['nphi'])
-    z=np.linspace(data['zmin'], data['zmax'], data['nz'])
+    R=np.squeeze(np.linspace(data['Rmin'], data['Rmax'], data['nR']))
+    phi=np.squeeze(np.linspace(data['phimin'], data['phimax'], data['nphi']))
+    z=np.squeeze(np.linspace(data['zmin'], data['zmax'], data['nz']))
     BRparam = interp.RegularGridInterpolator((R,phi,z),BR)
     Bzparam = interp.RegularGridInterpolator((R,phi,z),Bz)
     try:
