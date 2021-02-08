@@ -5,8 +5,7 @@ Sanity checks on the input to ascot
 from __future__ import print_function
 import numpy as np
 import matplotlib.pyplot as plt
-import a4py.classes.ReadEQDSK
-from plot.plot_ascotinput import *
+from pybiosaw.plot.plot_ascotinput import *
 import a5py.ascot5io.ascot5 as a5                                                                                                   
 from a5py.ascotpy.ascotpy import Ascotpy
 
