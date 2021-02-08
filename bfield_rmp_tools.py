@@ -57,7 +57,9 @@ def rz_rho(R, z, rhoRz, rho):
     """
     Finds R and Z of a surface of constant rho
     """
-    cs = plt.contour(R, z, rhoRz, [rho]);
+    print(f'Finding R and Z surfaces of rho={rho}')
+    RR,zz=np.meshgrid(R,z)
+    cs = plt.contour(RR, zz, rhoRz, [rho]);
     RZsurface=cs.collections[0].get_paths()[0].vertices; plt.close('all')
     #must put the array so that the indexing starts from outer midplane
     ind=np.arange(1,np.size(RZsurface,0),6); ind=ind[::-1]
