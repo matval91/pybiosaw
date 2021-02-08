@@ -15,7 +15,7 @@ import a5py.ascot5io.B_2DS as B_2D
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp2d, RectBivariateSpline
 import scipy.interpolate as interp
-import a4py.classes.ReadEQDSK as ReadEQDSK
+import a5py.preprocessing.ReadEQDSK as ReadEQDSK
 import utils.cocos_transform as ct
 from utils.plot_utils import define_colors
 import scipy.io as io
@@ -26,7 +26,8 @@ import pdb
 
 def read_fields(fnfield='/home/vallar/WORK/JT-60SA/3D/biosaw/efcc_output/wholecoils_EFCC540phi.h5', 
     fnout='/home/vallar/JT60-SA/3D/bfield/ITER-like/EFCC_UML_n3_56deg0deg77deg.h5', 
-    eqd_fname='/home/vallar/JT60-SA/003/eqdsk_fromRUI_20170715_SCENARIO3/Equil_JT60_prova01_e_refined_COCOS7.eqdsk',\
+    eqd_fname='/home/vallar/JT60-SA/003/eqdsk_fromRUI_20170715_SCENARIO3/Equil_JT60_prova01_e_refined_COCOS7.eqdsk',
+    fname_ripple='',
     bnorm_calculation=1, cocos=7, rho_bnorm=1., real=False):
     """
     data, Bphi, BR, Bz, theta, new_phi, newBnorm=produce_fields(fncoils, fnout, nmode, U,M,L,phases)
@@ -65,12 +66,19 @@ def read_fields(fnfield='/home/vallar/WORK/JT-60SA/3D/biosaw/efcc_output/wholeco
     Bphi_eq_RZphi = np.repeat(Bphi_eq_RZ, data['nz']).reshape((data['nR'], data['nphi'], data['nz']))
     Bphi = Bphi+Bphi_eq_RZphi
 
+    # Adding an additional field (namely, ripple) on top of the perturbation
+    if fname_ripple!='':
+        fname_TFripple_field = '/home/vallar/WORK/JT-60SA/ascot5_reference_files/scenario3/ascot_scen3_TFfield_wplasma.h5'
+        f  = a5.Ascot(fname_TFripple_field) 
+        bfield_ripple = f.bfield.B_3DS_3104593462.read()
+        # Read TF ripple file
+
     # You have to interpolate the psi so that the Rzgrid over which psi 
     # is defined is the same as the B fields
     param_psi = interp.interp2d(_R, _z, eq.psi, kind='cubic')
     z = np.linspace(data['zmin'],data['zmax'], data['nz']); 
     R = np.linspace(data['Rmin'],data['Rmax'], data['nR'])
-    psiRz = param_psi(R, z)
+    psiRz = param_psi(np.squeeze(R), np.squeeze(z))
 
     # Write output, same grid for fields and psi
     if fnout!='':
