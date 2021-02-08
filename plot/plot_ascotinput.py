@@ -5,7 +5,7 @@ Sanity checks on the input to ascot
 from __future__ import print_function
 import numpy as np
 import matplotlib.pyplot as plt
-import a4py.classes.ReadEQDSK as ReadEQDSK
+import a5py.preprocessing.ReadEQDSK as ReadEQDSK
 import a5py.ascot5io.ascot5 as ascot5
 import utils.plot_utils as pu
 
@@ -136,7 +136,7 @@ def plot_poloidalmax(bstruct):
     # Start of solution
     from matplotlib.cm import ScalarMappable
     levels = 400
-    vmin=0; vmax=1e-2*1000
+    vmin=0; vmax=7e-2*1000
     level_boundaries = np.linspace(vmin, vmax, levels + 1)
 
     fig=plt.figure();
