@@ -10,11 +10,11 @@ TODO Rotation could be put into its own function (that accepts scaling factor)
 import numpy as np
 import a5py.ascot5io.B_3DS as B_3D
 import a5py.ascot5io.B_2DS as B_2D
-
+import a5py.ascot5io.ascot5 as a5
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp2d, RectBivariateSpline
 import scipy.interpolate as interp
-import a4py.classes.ReadEQDSK as ReadEQDSK
+import a5py.preprocessing.ReadEQDSK as ReadEQDSK
 import utils.cocos_transform as ct
 from utils.plot_utils import define_colors
 from bfield_rmp_tools import *
@@ -23,15 +23,21 @@ import pdb
 
 def produce_fields(fncoils='/home/vallar/WORK/JT-60SA/3D/biosaw/efcc_output/wholecoils_EFCC540phi.h5', 
     fnout='/home/vallar/JT60-SA/3D/bfield/ITER-like/EFCC_UML_n3_56deg0deg77deg.h5', 
-    eqd_fname='/home/vallar/JT60-SA/003/eqdsk_fromRUI_20170715_SCENARIO3/Equil_JT60_prova01_e_refined_COCOS7.eqdsk',\
-                   nmode=3, U=1., M=1., L=1., phases=[56,0,77], bnorm_calculation=1, cocos=7, rho_bnorm=1.):
+    eqd_fname='/home/vallar/JT60-SA/003/eqdsk_fromRUI_20170715_SCENARIO3/Equil_JT60_prova01_e_refined_COCOS7.eqdsk',
+    fname_ripple='',
+    nmode=3, U=1., M=1., L=1., phases=[56,0,77], bnorm_calculation=1, cocos=7, rho_bnorm=1.):
     """
     data, Bphi, BR, Bz, theta, new_phi, newBnorm=produce_fields(fncoils, fnout, nmode, U,M,L,phases)
     """
     if fnout!='' and fnout[-2:]!='h5':
             print('Careful, output should be h5. Exiting')
             return 
-
+    coils_desc=''
+    if U: coils_desc=[coils_desc, 'U']
+    if M: coils_desc=[coils_desc, 'M']
+    if L: coils_desc=[coils_desc, 'L']
+    
+    desc = f'nmode={nmode}, coils={coils_desc}, phases={phases}'
     # Reading 2D magnetic field
     _eq=ReadEQDSK.ReadEQDSK(eqd_fname); eq = ct.cocos_transform(_eq, cocos,5)
     if 'prova01' in eqd_fname or eqd_fname=='/home/vallar/WORK/JT-60SA/input/005/JT-60SA_scenario5_eqdsk':
@@ -60,8 +66,24 @@ def produce_fields(fncoils='/home/vallar/WORK/JT-60SA/3D/biosaw/efcc_output/whol
     #Compute the magnetic field scaling
     # For EFCCs choose n mode (toroidal), currents and phase differences between coil rows
     BR,Bphi,Bz = compute(coils,data, BR, Bphi, Bz,nmode, U, M, L, phases)
-    for i,el in enumerate(coils["Rgrid"][0]):
-        Bphi[i,:,:] += -1.*eq.B0EXP*eq.R0EXP/el
+
+    if fname_ripple!='':
+        # Read TF ripple file
+        # fname_TFripple_field = '/home/vallar/WORK/JT-60SA/ascot5_reference_files/scenario3/ascot_scen3_TFfield_wplasma.h5'
+        f  = a5.Ascot(fname_ripple) 
+        bfield_ripple = f.bfield.B_3DS_3104593462.read()
+        #interpolate the fields
+        output_shape = np.shape(BR)
+        # for ir = 
+        #     interp2d(x, y, z, kind='linear')
+        # sum the fields
+        BR = BR+bfield_ripple['br']
+        Bz = Bz+bfield_ripple['bz']
+        Bphi = Bphi+bfield_ripple['bphi']  
+    else:
+        # add the standard eq field
+        for i,el in enumerate(coils["Rgrid"][0]):
+            Bphi[i,:,:] += -1.*eq.B0EXP*eq.R0EXP/el
 
     # You have to interpolate the psi so that the Rzgrid over which psi 
     # is defined is the same as the B fields
@@ -81,7 +103,7 @@ def produce_fields(fncoils='/home/vallar/WORK/JT-60SA/3D/biosaw/efcc_output/whol
                         axisR, axisz, psiRz.T, psiaxis, psisepx,
                         BR, Bphi, Bz,
                         psi_rmin=data["Rmin"], psi_rmax=data["Rmax"], psi_nr=data["nR"], \
-                        psi_zmin=data["zmin"], psi_zmax=data["zmax"], psi_nz=data["nz"])
+                        psi_zmin=data["zmin"], psi_zmax=data["zmax"], psi_nz=data["nz"], desc=desc)
 
     #Calculation of the Bfield normal to the flux surfaces
     rho_2d=np.sqrt((psiRz-psiaxis)/(psisepx-psiaxis))
